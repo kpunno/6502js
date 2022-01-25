@@ -194,7 +194,7 @@ These routines are defined in ROM:
 * CHRIN $ffcf - Input one character from keyboard (returns A)
 * CHROUT $ffdw - Outputs one character (A) to the screen at the current cursor
     position. Screen will wrap/scroll appropriately. Printable characters
-    and cursor codes ($80/$81/$82/$83 for up/right/left/down) as well as
+    and cursor codes ($80/$81/$82/$83 for up/right/down/left) as well as
     RETURN ($0d) are accepted. Printable ASCII codes with the high bit set
     will be printed in reverse video.
 * SCREEN $ffed - Returns the character screen size in the X and Y registers.
