@@ -2813,6 +2813,7 @@ function SimulatorWidget(node) {
 	{
 		var textFromFileLoaded = fileLoadedEvent.target.result;
 		document.getElementById("code").value = textFromFileLoaded;
+		initialize();
 	};
       	fileReader.readAsText(file, "UTF-8");
     }
