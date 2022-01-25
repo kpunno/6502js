@@ -7,7 +7,6 @@
  *
  *  Adapted by Chris Tyler 
  *  https://github.com/ctyler/6502js
- *  Incorporating patch from Anatoliy Serputov
  *
  *  Released under the GNU General Public License
  *  see http://gnu.org/licenses/gpl.html
@@ -2373,19 +2372,15 @@ function SimulatorWidget(node) {
       if (opcode === null) {
         return false;
       }
-      if (param.match(/^#\%[0-1]{1,8}$/i)) {
-        pushByte(opcode);
-        value = parseInt(param.replace(/^#\%/, ""), 2);
-        if (value < 0 || value > 255) { return false; }
-        pushByte(value);
-        return true;
-      }
-      if (param.match(/^#[0-9]{1,3}$/i)) {
-        pushByte(opcode);
-        value = parseInt(param.replace(/^#/, ""), 10);
-        if (value < 0 || value > 255) { return false; }
-        pushByte(value);
-        return true;
+
+      var match_data = param.match(/^#([\w\$]+)$/i);
+      if (match_data) {
+        var operand = tryParseByteOperand(match_data[1], symbols);
+        if (operand >= 0) {
+          pushByte(opcode);
+          pushByte(operand);
+          return true;
+        }
       }
 
       // Label lo/hi
@@ -2818,7 +2813,7 @@ function SimulatorWidget(node) {
 	{
 		var textFromFileLoaded = fileLoadedEvent.target.result;
 		document.getElementById("code").value = textFromFileLoaded;
-		initialize();
+		ui.initialize(); 
 	};
       	fileReader.readAsText(file, "UTF-8");
     }
