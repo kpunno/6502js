@@ -7,6 +7,7 @@
  *
  *  Adapted by Chris Tyler 
  *  https://github.com/ctyler/6502js
+ *  Incorporating patch from Anatoliy Serputov
  *
  *  Released under the GNU General Public License
  *  see http://gnu.org/licenses/gpl.html
