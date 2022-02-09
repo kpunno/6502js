@@ -75,86 +75,15 @@
         <label for="start">Start: $</label>
         <input type="text" value="0" class="start" name="start" />
         <label for="length">Length: $</label>
-        <input type="text" value="ff" class="length" name="length" />
+        <input type="text" value="100" class="length" name="length" />
 
 	<label for="console">Text screen</label>
 	<input type="checkbox" class="console" name="console" value="checked" checked />
       </div>
 
-
       <div class="monitor"><pre><code></code></pre></div>
       <div class="messages"><pre><code></code></pre></div>
-      <br />
-      <div class="buttons2">
-	<input type="button" value="Save" class="downloadButton" />
-	<input type="button" value="Load file:" class="uploadButton" />
-	<input type="file" id="uploadFilename">
-      </div>
-	      <div class="notes" style="display: none"><u><b>Notes:</b></u>
-
-<b>Controls:</b>
-* Assemble - Assembles (compiles) the source code in the text box into
-6502 object code at address $0600. Also performs a Reset. Any error 
-messages appear in the info box at the bottom of the page.
-* Run/Stop - Runs (executes) or stops execution of the 6502 code. This
-button will be disabled when unassembled code exists in the text box
-(for example, if you add code, or if the code doesn't assemble correctly).
-Code stops executing when a BRK instruction is hit (which is the default
-instruction following your assembled code).
-* Reset - Rests registers, sets the PC to $0600, and clears the zero page,
-stack, and displays.
-* Hexdump - Displays memory contents from $0600 to the end of the assembled
-code, in hexadecimal format.
-* Disasseble - Display a hexdump plus a disassembly of the memory contents
-from $0600 to the end of the assembled code. Note: if the disassembled 
-code does not match your source code after a Run, then your code has
-probably overwritten memory page $06 (and later) -- which is easy to do 
-since this page immediately follows the bitmapped display.
-* Notes - Displays this information text in the info box at the bottom
-of the page.
-* Speed - Sets the speed of execution in instructions per display frame.
-Set to the left, the speed will be approximately 1% of a 1MHz 6502; on the
-right, it will be about 100% (or just over).
-* Save - Downloads the source code in the text box to your local machine.
-This is an easy way to make backup copies of evolving code, or to place
-the code in a file under version control.
-* Load - Loads the specified file from the local machine into the text box.
-This is an alternative to cutting and pasting code into the emulator.
-
-* Monitor - Displays the memory region starting at "Start" and running 
-for "Length" bytes.
-* Text screen - Enables and disables the text display (on the right hand
-side).
-
-* Debugger - Turns on single-stepping controls.
-* Step - Executes a single instruction.
-* Jump to... - Jumps to the specified address or label.
-
-<b>Memory map:</b>
-All 64K ($0000-$ffff) is populated with RAM and available. This is the
-system memory map:
-
-Page $00: 6502 zero page, used for variables and pointers
-  Two locations in the zero page are connected to devices:
-  * Memory location $fe contains a new random byte on every read.
-  * Memory location $ff contains the ascii code of the last key pressed.
-    Values written to $ff will remain unchanged until next key press.
-    Printable keys have their ASCII value; BackSpace is $08; Enter is $0d;
-    Cursor controls are $80=up, $81=right, $82=down, $83=left
-Page $01: 6502 stack (downward)
-Pages $02-05: bitmapped display
-Pages $06-$ef: your code and data
-Pages $f0-$f7: character display
-Pages $f8-$fd: reserved for future ROM expansion
-Pages $fe-$ff: ROM code (see below)
-
-<b>Available Assembler Directives:</b>
-dcb <i>value</i>[,<i>value</i> [...]] - (define constant byte) used to create 
-constants in memory. Multiple bytes are separated by commas. Values 
-may be in decimal, hexadecimal, or single characters in double quotes 
-(except spaces - use 32 or $20 to represent a space).
-
-	      <div class="notes" style="display: none"><u><b>Notes:</b></u>
+      <div class="notes" style="display: none"><u><b>Notes:</b></u>
 
 <b>Controls:</b>
 * Assemble - Assembles (compiles) the source code in the text box into
@@ -302,7 +231,7 @@ More examples, plus the ROM source code:
 
 Source code for this emulator:
 <a href="https://github.com/ctyler/6502js" target="_blank">https://github.com/ctyler/6502js</a>
-    </div>
+</div>
 
     <script src="es5-shim.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>

@@ -362,6 +362,8 @@ function SimulatorWidget(node) {
       if (code) {
         memory.storeByte(0xff, code);
       }
+/*      e.stopPropagation(); */
+/*       e.preventDefault(); */
     }
 
     function format(start, length) {
