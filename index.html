@@ -3,9 +3,9 @@
   <head>
     <link href="style.css" rel="stylesheet" type="text/css" />
     <title>6502 assembler/simulator</title>
+    <link href="prism.css" rel="stylesheet" />
   </head>
   <body>
-
     <div class="widget">
       <div class="buttons">
         <input type="button" value="Assemble" class="assembleButton" />
@@ -23,7 +23,9 @@
       </div>
 
 
-      <textarea class="code" id="code" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    <!--  <textarea class="code" id="code"></textarea> -->
+
+    <code-bedder id="code" class="code" data-language="asm6502" onhighlight="Prism.highlightElement(this)"></code-bedder>
 
       <canvas class="screen" width="160" height="160"></canvas>
 
@@ -236,6 +238,9 @@ Source code for this emulator:
     <script src="es5-shim.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script src="assembler.js"></script>
+
+    <script src="prism.js"></script>
+    <script src="codebedder.js"></script>
   </body>
 </html>
 

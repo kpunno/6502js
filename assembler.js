@@ -68,7 +68,7 @@ function SimulatorWidget(node) {
 
     editor.on('keypress input', simulator.stop);
     editor.on('keypress input', ui.initialize);
-    editor.keydown(ui.captureTabInEditor);
+/*    editor.keydown(ui.captureTabInEditor); */
 
     document.addEventListener('keydown',memory.storeKeydown);
     /* $(document).keypress(memory.storeKeypress); */
