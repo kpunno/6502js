@@ -5,13 +5,13 @@
  *  Adapted by Nick Morgan
  *  https://github.com/skilldrick/6502js
  *
- *  Adapted by Chris Tyler 
+ *  Adapted by Chris Tyler
  *  https://github.com/ctyler/6502js
  *
  *  Released under the GNU General Public License
  *  see http://gnu.org/licenses/gpl.html
  */
-'use strict';
+"use strict";
 
 function SimulatorWidget(node) {
   var $node = $(node);
@@ -32,22 +32,19 @@ function SimulatorWidget(node) {
     screen.initialize();
     simulator.reset();
 
-    $node.find('.assembleButton').click(function() {
+    $node.find(".assembleButton").click(function () {
       assembler.assembleCode();
     });
-    $node.find('.runButton').click(simulator.runBinary);
-    $node.find('.runButton').click(simulator.stopDebugger);
-    $node.find('.resetButton').click(simulator.reset);
-    $node.find('.hexdumpButton').click(assembler.hexdump);
-    $node.find('.disassembleButton').click(assembler.disassemble);
-    $node.find('.downloadButton').click(assembler.download);
-    $node.find('.uploadButton').click(assembler.upload);
-    $node.find('.autorunButton').click(function() {
-      assembler.assembleCode();
+
+    $node.find(".downloadButton").click(assembler.download);
+    $node.find(".autorunButton").click(async function () {
+      await ui.loadCodeFile();
+      var code = (document.getElementById('codebed').value);
+      assembler.assembleCode(code);
       simulator.runBinary();
     });
-    $node.find('.debug').change(function() {
-      var debug = $(this).is(':checked');
+    $node.find(".debug").change(function () {
+      var debug = $(this).is(":checked");
       if (debug) {
         ui.debugOn();
         simulator.enableDebugger();
@@ -56,26 +53,26 @@ function SimulatorWidget(node) {
         simulator.stopDebugger();
       }
     });
-    $node.find('.monitoring').change(function() {
+    $node.find(".monitoring").change(function () {
       ui.toggleMonitor();
       simulator.toggleMonitor();
     });
-    $node.find('.console').change(function() {
+    $node.find(".console").change(function () {
       ui.toggleConsole();
       simulator.toggleConsole();
     });
-    $node.find('.start, .length').blur(simulator.handleMonitorRangeChange);
-    $node.find('.stepButton').click(simulator.debugExec);
-    $node.find('.gotoButton').click(simulator.gotoAddr);
-    $node.find('.notesButton').click(ui.showNotes);
+    $node.find(".start, .length").blur(simulator.handleMonitorRangeChange);
+    $node.find(".stepButton").click(simulator.debugExec);
+    $node.find(".gotoButton").click(simulator.gotoAddr);
+    $node.find(".notesButton").click(ui.showNotes);
 
-    var editor = $node.find('.code');
+    var editor = $node.find(".code");
 
-    editor.on('keypress input', simulator.stop);
-    editor.on('keypress input', ui.initialize);
-/*    editor.keydown(ui.captureTabInEditor); */
+    editor.on("keypress input", simulator.stop);
+    editor.on("keypress input", ui.initialize);
+    /*    editor.keydown(ui.captureTabInEditor); */
 
-    document.addEventListener('keydown',memory.storeKeydown);
+    document.addEventListener("keydown", memory.storeKeydown);
     /* $(document).keypress(memory.storeKeypress); */
 
     simulator.handleMonitorRangeChange();
@@ -83,9 +80,9 @@ function SimulatorWidget(node) {
 
   function stripText() {
     //Remove leading and trailing space in textarea
-    var text = $node.find('.code').val();
-    text = text.replace(/^\n+/, '').replace(/\s+$/, '');
-    $node.find('.code').val(text);
+    var text = $node.find(".code").val();
+    text = text.replace(/^\n+/, "").replace(/\s+$/, "");
+    $node.find(".code").val(text);
   }
 
   function UI() {
@@ -93,57 +90,61 @@ function SimulatorWidget(node) {
 
     var start = {
       assemble: true,
-      run: [false, 'Run'],
+      run: [false, "Run"],
       reset: false,
       hexdump: false,
       disassemble: false,
-      debug: [false, false]
+      debug: [false, false],
     };
     var assembled = {
       assemble: false,
-      run: [true, 'Run'],
+      run: [true, "Run"],
       reset: true,
       hexdump: true,
       disassemble: true,
-      debug: [true, false]
+      debug: [true, false],
     };
     var running = {
       assemble: false,
-      run: [true, 'Stop'],
+      run: [true, "Stop"],
       reset: true,
       hexdump: false,
       disassemble: false,
-      debug: [true, false]
+      debug: [true, false],
     };
     var debugging = {
       assemble: false,
       reset: true,
       hexdump: true,
       disassemble: true,
-      debug: [true, true]
+      debug: [true, true],
     };
     var postDebugging = {
       assemble: false,
       reset: true,
       hexdump: true,
       disassemble: true,
-      debug: [true, false]
+      debug: [true, false],
     };
-
+    
+    async function loadCodeFile() {
+      var code = await fetch("./astroboy.asm").then((res)=>res.text());
+      document.getElementById("codebed").value = code;
+    }
 
     function setState(state) {
-      $node.find('.assembleButton').attr('disabled', !state.assemble);
+      $node.find(".assembleButton").attr("disabled", !state.assemble);
       if (state.run) {
-        $node.find('.runButton').attr('disabled', !state.run[0]);
-        $node.find('.runButton').val(state.run[1]);
+        $node.find(".runButton").attr("disabled", !state.run[0]);
+        $node.find(".runButton").val(state.run[1]);
       }
-      $node.find('.resetButton').attr('disabled', !state.reset);
-      $node.find('.hexdumpButton').attr('disabled', !state.hexdump);
-      $node.find('.disassembleButton').attr('disabled', !state.disassemble);
-      $node.find('.debug').attr('disabled', !state.debug[0]);
-      $node.find('.debug').attr('checked', state.debug[1]);
-      $node.find('.stepButton').attr('disabled', !state.debug[1]);
-      $node.find('.gotoButton').attr('disabled', !state.debug[1]);
+      $node.find(".resetButton").attr("disabled", !state.reset);
+      $node.find(".hexdumpButton").attr("disabled", !state.hexdump);
+      $node.find(".disassembleButton").attr("disabled", !state.disassemble);
+      $node.find(".debug").attr("disabled", !state.debug[0]);
+      $node.find(".debug").attr("checked", state.debug[1]);
+      $node.find(".stepButton").attr("disabled", !state.debug[1]);
+      $node.find(".gotoButton").attr("disabled", !state.debug[1]);
       currentState = state;
     }
 
@@ -172,26 +173,25 @@ function SimulatorWidget(node) {
     }
 
     function toggleMonitor() {
-      $node.find('.monitor').toggle();
+      $node.find(".monitor").toggle();
     }
 
     function toggleConsole() {
-      var c = document.getElementById('textscreenarea');
+      var c = document.getElementById("textscreenarea");
       if (c.style.display === "none") {
         c.style.display = "block";
       } else {
-	c.style.display = "none";
+        c.style.display = "none";
       }
     }
 
     function showNotes() {
-      $node.find('.messages code').html($node.find('.notes').html());
+      $node.find(".messages code").html($node.find(".notes").html());
     }
 
     function captureTabInEditor(e) {
       // Tab Key
       if (e.keyCode === 9) {
-
         // Prevent focus loss
         e.preventDefault();
 
@@ -200,7 +200,10 @@ function SimulatorWidget(node) {
           caretEnd = this.selectionEnd,
           currentValue = this.value;
 
-        this.value = currentValue.substring(0, caretStart) + "\t" + currentValue.substring(caretEnd);
+        this.value =
+          currentValue.substring(0, caretStart) +
+          "\t" +
+          currentValue.substring(caretEnd);
 
         // Move cursor forwards one (after tab)
         this.selectionStart = this.selectionEnd = caretStart + 1;
@@ -208,6 +211,7 @@ function SimulatorWidget(node) {
     }
 
     return {
+      loadCodeFile: loadCodeFile,
       initialize: initialize,
       play: play,
       stop: stop,
@@ -217,18 +221,29 @@ function SimulatorWidget(node) {
       toggleMonitor: toggleMonitor,
       toggleConsole: toggleConsole,
       showNotes: showNotes,
-      captureTabInEditor: captureTabInEditor
+      captureTabInEditor: captureTabInEditor,
     };
   }
-
 
   function Display() {
     var displayArray = [];
     var palette = [
-      "#000000", "#ffffff", "#880000", "#aaffee",
-      "#cc44cc", "#00cc55", "#0000aa", "#eeee77",
-      "#dd8855", "#664400", "#ff7777", "#333333",
-      "#777777", "#aaff66", "#0088ff", "#bbbbbb"
+      "#000000",
+      "#ffffff",
+      "#880000",
+      "#aaffee",
+      "#cc44cc",
+      "#00cc55",
+      "#0000aa",
+      "#eeee77",
+      "#dd8855",
+      "#664400",
+      "#ff7777",
+      "#333333",
+      "#777777",
+      "#aaff66",
+      "#0088ff",
+      "#bbbbbb",
     ];
     var ctx;
     var width;
@@ -238,11 +253,11 @@ function SimulatorWidget(node) {
     var numY = 32;
 
     function initialize() {
-      var canvas = $node.find('.screen')[0];
+      var canvas = $node.find(".screen")[0];
       width = canvas.width;
       height = canvas.height;
       pixelSize = width / numX;
-      ctx = canvas.getContext('2d');
+      ctx = canvas.getContext("2d");
       reset();
     }
 
@@ -261,7 +276,7 @@ function SimulatorWidget(node) {
     return {
       initialize: initialize,
       reset: reset,
-      updatePixel: updatePixel
+      updatePixel: updatePixel,
     };
   }
 
@@ -306,18 +321,20 @@ function SimulatorWidget(node) {
     return {
       initialize: initialize,
       reset: reset,
-      updateChar: updateChar
+      updateChar: updateChar,
     };
   }
 
   function Memory() {
     var memArray = new Array(0xfe00);
-    memArray.push(0x48,0x8a,0x48,0x98,0x48,0xa4,0xf6,0xb9,0x1c,0xfe,0x18,0x65,0xf5,0x85,0xf7,0xb9,0x35,0xfe,0x69,0x00,0x85,0xf8,0x68,0xa8,0x68,0xaa,0x68,0x60,0x00,0x50,0xa0,0xf0,0x40,0x90,0xe0,0x30,0x80,0xd0,0x20,0x70,0xc0,0x10,0x60,0xb0,0x00,0x50,0xa0,0xf0,0x40,0x90,0xe0,0x30,0x80,0xf0,0xf0,0xf0,0xf0,0xf1,0xf1,0xf1,0xf2,0xf2,0xf2,0xf3,0xf3,0xf3,0xf4,0xf4,0xf4,0xf5,0xf5,0xf5,0xf5,0xf6,0xf6,0xf6,0xf7,0xf7,0xc9,0x08,0xf0,0x27,0xc9,0x0a,0xf0,0x3d,0xc9,0x0d,0xf0,0x39,0xc9,0x80,0xf0,0x7c,0xc9,0x81,0xf0,0x3b,0xc9,0x82,0xf0,0x64,0xc9,0x83,0xf0,0x45,0x20,0x00,0xfe,0x84,0xfd,0xa0,0x00,0x91,0xf7,0x20,0x9d,0xfe,0xa4,0xfd,0x60,0x48,0x98,0x48,0x8a,0x48,0x20,0xaf,0xfe,0x20,0x00,0xfe,0xa0,0x00,0xa9,0x20,0x91,0xf7,0xa6,0x50,0xca,0x68,0xaa,0x68,0xa8,0x68,0x60,0x48,0xa9,0x00,0x85,0xf5,0x20,0xca,0xfe,0x68,0x60,0x48,0xe6,0xf5,0xa9,0x50,0xc5,0xf5,0xd0,0x07,0xa9,0x00,0x85,0xf5,0x20,0xca,0xfe,0x68,0x60,0x48,0xc6,0xf5,0x10,0x14,0xa5,0xf6,0xf0,0x0a,0xa9,0x50,0x85,0xf5,0x20,0xda,0xfe,0x18,0x90,0x06,0xa9,0x00,0x85,0xf5,0x85,0xf6,0x68,0x60,0x48,0xe6,0xf6,0xa9,0x19,0xc5,0xf6,0xd0,0x05,0x20,0x2f,0xff,0xc6,0xf6,0x68,0x60,0xc6,0xf6,0x10,0x02,0xe6,0xf6,0x60,0x48,0x98,0x48,0xa9,0x00,0x85,0xf5,0x85,0xf6,0x20,0x00,0xfe,0xa0,0x00,0xa9,0x20,0x91,0xf7,0xc8,0xd0,0xfb,0xe6,0xf8,0xa5,0xf8,0xc9,0xf8,0xd0,0xf1,0x20,0x00,0xfe,0x68,0x98,0x68,0x60,0xa5,0xff,0xf0,0x06,0x48,0xa9,0x00,0x85,0xff,0x68,0x60,0xa0,0x19,0xa2,0x50,0x60,0xb0,0x0c,0x86,0xf5,0x84,0xf6,0x20,0x00,0xfe,0xa4,0xf8,0xa5,0xf7,0x60,0x20,0x00,0xfe,0xa0,0x00,0xb1,0xf7,0xa6,0xf5,0xa4,0xf6,0x60,0x48,0x98,0x48,0xa9,0x00,0x85,0xfb,0xa9,0x50,0x85,0xf9,0xa9,0xf0,0x85,0xfa,0x85,0xfc,0xa0,0x00,0xb1,0xf9,0x91,0xfb,0xc8,0xd0,0xf9,0xe6,0xfa,0xe6,0xfc,0xa9,0xf7,0xc5,0xfa,0xd0,0xef,0xb1,0xf9,0x91,0xfb,0xc8,0xc0,0x80,0xd0,0xf7,0xa0,0x00,0xa9,0x20,0x99,0x80,0xf7,0xc8,0xc0,0x50,0xd0,0xf8,0x68,0xa8,0x68,0x60,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x4c,0xe1,0xfe,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x4c,0x05,0xff,0x4c,0x4e,0xfe,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x4c,0x10,0xff,0x4c,0x15,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00);
+    memArray.push(
+      0x48, 0x8a, 0x48, 0x98, 0x48, 0xa4, 0xf6, 0xb9, 0x1c, 0xfe, 0x18, 0x65, 0xf5, 0x85, 0xf7, 0xb9, 0x35, 0xfe, 0x69, 0x00, 0x85, 0xf8, 0x68, 0xa8, 0x68, 0xaa, 0x68, 0x60, 0x00, 0x50, 0xa0, 0xf0, 0x40, 0x90, 0xe0, 0x30, 0x80, 0xd0, 0x20, 0x70, 0xc0, 0x10, 0x60, 0xb0, 0x00, 0x50, 0xa0, 0xf0, 0x40, 0x90, 0xe0, 0x30, 0x80, 0xf0, 0xf0, 0xf0, 0xf0, 0xf1, 0xf1, 0xf1, 0xf2, 0xf2, 0xf2, 0xf3, 0xf3, 0xf3, 0xf4, 0xf4, 0xf4, 0xf5, 0xf5, 0xf5, 0xf5, 0xf6, 0xf6, 0xf6, 0xf7, 0xf7, 0xc9, 0x08, 0xf0, 0x27, 0xc9, 0x0a, 0xf0, 0x3d, 0xc9, 0x0d, 0xf0, 0x39, 0xc9, 0x80, 0xf0, 0x7c, 0xc9, 0x81, 0xf0, 0x3b, 0xc9, 0x82, 0xf0, 0x64, 0xc9, 0x83, 0xf0, 0x45, 0x20, 0x00, 0xfe, 0x84, 0xfd, 0xa0, 0x00, 0x91, 0xf7, 0x20, 0x9d, 0xfe, 0xa4, 0xfd, 0x60, 0x48, 0x98, 0x48, 0x8a, 0x48, 0x20, 0xaf, 0xfe, 0x20, 0x00, 0xfe, 0xa0, 0x00, 0xa9, 0x20, 0x91, 0xf7, 0xa6, 0x50, 0xca, 0x68, 0xaa, 0x68, 0xa8, 0x68, 0x60, 0x48, 0xa9, 0x00, 0x85, 0xf5, 0x20, 0xca, 0xfe, 0x68, 0x60, 0x48, 0xe6, 0xf5, 0xa9, 0x50, 0xc5, 0xf5, 0xd0, 0x07, 0xa9, 0x00, 0x85, 0xf5, 0x20, 0xca, 0xfe, 0x68, 0x60, 0x48, 0xc6, 0xf5, 0x10, 0x14, 0xa5, 0xf6, 0xf0, 0x0a, 0xa9, 0x50, 0x85, 0xf5, 0x20, 0xda, 0xfe, 0x18, 0x90, 0x06, 0xa9, 0x00, 0x85, 0xf5, 0x85, 0xf6, 0x68, 0x60, 0x48, 0xe6, 0xf6, 0xa9, 0x19, 0xc5, 0xf6, 0xd0, 0x05, 0x20, 0x2f, 0xff, 0xc6, 0xf6, 0x68, 0x60, 0xc6, 0xf6, 0x10, 0x02, 0xe6, 0xf6, 0x60, 0x48, 0x98, 0x48, 0xa9, 0x00, 0x85, 0xf5, 0x85, 0xf6, 0x20, 0x00, 0xfe, 0xa0, 0x00, 0xa9, 0x20, 0x91, 0xf7, 0xc8, 0xd0, 0xfb, 0xe6, 0xf8, 0xa5, 0xf8, 0xc9, 0xf8, 0xd0, 0xf1, 0x20, 0x00, 0xfe, 0x68, 0x98, 0x68, 0x60, 0xa5, 0xff, 0xf0, 0x06, 0x48, 0xa9, 0x00, 0x85, 0xff, 0x68, 0x60, 0xa0, 0x19, 0xa2, 0x50, 0x60, 0xb0, 0x0c, 0x86, 0xf5, 0x84, 0xf6, 0x20, 0x00, 0xfe, 0xa4, 0xf8, 0xa5, 0xf7, 0x60, 0x20, 0x00, 0xfe, 0xa0, 0x00, 0xb1, 0xf7, 0xa6, 0xf5, 0xa4, 0xf6, 0x60, 0x48, 0x98, 0x48, 0xa9, 0x00, 0x85, 0xfb, 0xa9, 0x50, 0x85, 0xf9, 0xa9, 0xf0, 0x85, 0xfa, 0x85, 0xfc, 0xa0, 0x00, 0xb1, 0xf9, 0x91, 0xfb, 0xc8, 0xd0, 0xf9, 0xe6, 0xfa, 0xe6, 0xfc, 0xa9, 0xf7, 0xc5, 0xfa, 0xd0, 0xef, 0xb1, 0xf9, 0x91, 0xfb, 0xc8, 0xc0, 0x80, 0xd0, 0xf7, 0xa0, 0x00, 0xa9, 0x20, 0x99, 0x80, 0xf7, 0xc8, 0xc0, 0x50, 0xd0, 0xf8, 0x68, 0xa8, 0x68, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4c, 0xe1, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4c, 0x05, 0xff, 0x4c, 0x4e, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4c, 0x10, 0xff, 0x4c, 0x15, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+    );
 
     function set(addr, val) {
       // write data if not in the ROM range
-      if ((addr >= 0x0000) && (addr < 0xfe00)) {
-        return memArray[addr] = val;
+      if (addr >= 0x0000 && addr < 0xfe00) {
+        return (memArray[addr] = val);
       } else {
         return False;
       }
@@ -337,10 +354,10 @@ function SimulatorWidget(node) {
     // Poke a byte, don't touch any registers
     function storeByte(addr, value) {
       set(addr, value & 0xff);
-      if ((addr >= 0x200) && (addr <= 0x5ff)) {
+      if (addr >= 0x200 && addr <= 0x5ff) {
         display.updatePixel(addr);
       }
-      if ((addr >= 0xf000) && (addr < 0xf000 + 80 * 25)) {
+      if (addr >= 0xf000 && addr < 0xf000 + 80 * 25) {
         screen.updateChar(addr);
       }
     }
@@ -367,12 +384,12 @@ function SimulatorWidget(node) {
       if (code) {
         memory.storeByte(0xff, code);
       }
-/*      e.stopPropagation(); */
-/*       e.preventDefault(); */
+      /*      e.stopPropagation(); */
+      /*       e.preventDefault(); */
     }
 
     function format(start, length) {
-      var html = '';
+      var html = "";
       var n;
 
       for (var x = 0; x < length; x++) {
@@ -380,9 +397,9 @@ function SimulatorWidget(node) {
           if (x > 0) {
             html += "\n";
           }
-          n = (start + x);
-          html += num2hex(((n >> 8) & 0xff));
-          html += num2hex((n & 0xff));
+          n = start + x;
+          html += num2hex((n >> 8) & 0xff);
+          html += num2hex(n & 0xff);
           html += ": ";
         }
         html += num2hex(memory.get(start + x));
@@ -397,7 +414,7 @@ function SimulatorWidget(node) {
       getWord: getWord,
       storeByte: storeByte,
       storeKeydown: storeKeydown,
-      format: format
+      format: format,
     };
   }
 
@@ -484,7 +501,6 @@ function SimulatorWidget(node) {
       regP |= 1;
     }
 
-
     function CLV() {
       regP &= 0xbf;
     }
@@ -511,9 +527,9 @@ function SimulatorWidget(node) {
 
     function jumpBranch(offset) {
       if (offset > 0x7f) {
-        regPC = (regPC - (0x100 - offset));
+        regPC = regPC - (0x100 - offset);
       } else {
-        regPC = (regPC + offset);
+        regPC = regPC + offset;
       }
     }
 
@@ -543,7 +559,7 @@ function SimulatorWidget(node) {
       } else {
         CLC();
       }
-      val = (reg - val);
+      val = reg - val;
       setNVflags(val);
     }
 
@@ -641,12 +657,12 @@ function SimulatorWidget(node) {
     }
 
     var instructions = {
-      i00: function() {
+      i00: function () {
         codeRunning = false;
         //BRK
       },
 
-      i01: function() {
+      i01: function () {
         var zp = (popByte() + regX) & 0xff;
         var addr = memory.getWord(zp);
         var value = memory.get(addr);
@@ -654,13 +670,13 @@ function SimulatorWidget(node) {
         ORA();
       },
 
-      i05: function() {
+      i05: function () {
         var zp = popByte();
         regA |= memory.get(zp);
         ORA();
       },
 
-      i06: function() {
+      i06: function () {
         var zp = popByte();
         var value = memory.get(zp);
         setCarryFlagFromBit7(value);
@@ -669,28 +685,28 @@ function SimulatorWidget(node) {
         ASL(value);
       },
 
-      i08: function() {
+      i08: function () {
         stackPush(regP | 0x30);
         //PHP
       },
 
-      i09: function() {
+      i09: function () {
         regA |= popByte();
         ORA();
       },
 
-      i0a: function() {
+      i0a: function () {
         setCarryFlagFromBit7(regA);
         regA = (regA << 1) & 0xff;
         ASL(regA);
       },
 
-      i0d: function() {
+      i0d: function () {
         regA |= memory.get(popWord());
         ORA();
       },
 
-      i0e: function() {
+      i0e: function () {
         var addr = popWord();
         var value = memory.get(addr);
         setCarryFlagFromBit7(value);
@@ -699,7 +715,7 @@ function SimulatorWidget(node) {
         ASL(value);
       },
 
-      i10: function() {
+      i10: function () {
         var offset = popByte();
         if (!negativeSet()) {
           jumpBranch(offset);
@@ -707,20 +723,20 @@ function SimulatorWidget(node) {
         //BPL
       },
 
-      i11: function() {
+      i11: function () {
         var zp = popByte();
         var value = memory.getWord(zp) + regY;
         regA |= memory.get(value);
         ORA();
       },
 
-      i15: function() {
+      i15: function () {
         var addr = (popByte() + regX) & 0xff;
         regA |= memory.get(addr);
         ORA();
       },
 
-      i16: function() {
+      i16: function () {
         var addr = (popByte() + regX) & 0xff;
         var value = memory.get(addr);
         setCarryFlagFromBit7(value);
@@ -729,23 +745,23 @@ function SimulatorWidget(node) {
         ASL(value);
       },
 
-      i18: function() {
+      i18: function () {
         CLC();
       },
 
-      i19: function() {
+      i19: function () {
         var addr = popWord() + regY;
         regA |= memory.get(addr);
         ORA();
       },
 
-      i1d: function() {
+      i1d: function () {
         var addr = popWord() + regX;
         regA |= memory.get(addr);
         ORA();
       },
 
-      i1e: function() {
+      i1e: function () {
         var addr = popWord() + regX;
         var value = memory.get(addr);
         setCarryFlagFromBit7(value);
@@ -754,16 +770,16 @@ function SimulatorWidget(node) {
         ASL(value);
       },
 
-      i20: function() {
+      i20: function () {
         var addr = popWord();
         var currAddr = regPC - 1;
-        stackPush(((currAddr >> 8) & 0xff));
-        stackPush((currAddr & 0xff));
+        stackPush((currAddr >> 8) & 0xff);
+        stackPush(currAddr & 0xff);
         regPC = addr;
         //JSR
       },
 
-      i21: function() {
+      i21: function () {
         var zp = (popByte() + regX) & 0xff;
         var addr = memory.getWord(zp);
         var value = memory.get(addr);
@@ -771,19 +787,19 @@ function SimulatorWidget(node) {
         AND();
       },
 
-      i24: function() {
+      i24: function () {
         var zp = popByte();
         var value = memory.get(zp);
         BIT(value);
       },
 
-      i25: function() {
+      i25: function () {
         var zp = popByte();
         regA &= memory.get(zp);
         AND();
       },
 
-      i26: function() {
+      i26: function () {
         var sf = carrySet();
         var addr = popByte();
         var value = memory.get(addr);
@@ -794,17 +810,17 @@ function SimulatorWidget(node) {
         ROL(value);
       },
 
-      i28: function() {
+      i28: function () {
         regP = stackPop() | 0x30; // There is no B bit!
         //PLP
       },
 
-      i29: function() {
+      i29: function () {
         regA &= popByte();
         AND();
       },
 
-      i2a: function() {
+      i2a: function () {
         var sf = carrySet();
         setCarryFlagFromBit7(regA);
         regA = (regA << 1) & 0xff;
@@ -812,18 +828,18 @@ function SimulatorWidget(node) {
         ROL(regA);
       },
 
-      i2c: function() {
+      i2c: function () {
         var value = memory.get(popWord());
         BIT(value);
       },
 
-      i2d: function() {
+      i2d: function () {
         var value = memory.get(popWord());
         regA &= value;
         AND();
       },
 
-      i2e: function() {
+      i2e: function () {
         var sf = carrySet();
         var addr = popWord();
         var value = memory.get(addr);
@@ -834,7 +850,7 @@ function SimulatorWidget(node) {
         ROL(value);
       },
 
-      i30: function() {
+      i30: function () {
         var offset = popByte();
         if (negativeSet()) {
           jumpBranch(offset);
@@ -842,20 +858,20 @@ function SimulatorWidget(node) {
         //BMI
       },
 
-      i31: function() {
+      i31: function () {
         var zp = popByte();
         var value = memory.getWord(zp) + regY;
         regA &= memory.get(value);
         AND();
       },
 
-      i35: function() {
+      i35: function () {
         var addr = (popByte() + regX) & 0xff;
         regA &= memory.get(addr);
         AND();
       },
 
-      i36: function() {
+      i36: function () {
         var sf = carrySet();
         var addr = (popByte() + regX) & 0xff;
         var value = memory.get(addr);
@@ -866,25 +882,25 @@ function SimulatorWidget(node) {
         ROL(value);
       },
 
-      i38: function() {
+      i38: function () {
         SEC();
       },
 
-      i39: function() {
+      i39: function () {
         var addr = popWord() + regY;
         var value = memory.get(addr);
         regA &= value;
         AND();
       },
 
-      i3d: function() {
+      i3d: function () {
         var addr = popWord() + regX;
         var value = memory.get(addr);
         regA &= value;
         AND();
       },
 
-      i3e: function() {
+      i3e: function () {
         var sf = carrySet();
         var addr = popWord() + regX;
         var value = memory.get(addr);
@@ -895,27 +911,27 @@ function SimulatorWidget(node) {
         ROL(value);
       },
 
-      i40: function() {
+      i40: function () {
         regP = stackPop() | 0x30; // There is no B bit!
         regPC = stackPop() | (stackPop() << 8);
         //RTI
       },
 
-      i41: function() {
+      i41: function () {
         var zp = (popByte() + regX) & 0xff;
         var value = memory.getWord(zp);
         regA ^= memory.get(value);
         EOR();
       },
 
-      i45: function() {
+      i45: function () {
         var addr = popByte() & 0xff;
         var value = memory.get(addr);
         regA ^= value;
         EOR();
       },
 
-      i46: function() {
+      i46: function () {
         var addr = popByte() & 0xff;
         var value = memory.get(addr);
         setCarryFlagFromBit0(value);
@@ -924,35 +940,35 @@ function SimulatorWidget(node) {
         LSR(value);
       },
 
-      i48: function() {
+      i48: function () {
         stackPush(regA);
         //PHA
       },
 
-      i49: function() {
+      i49: function () {
         regA ^= popByte();
         EOR();
       },
 
-      i4a: function() {
+      i4a: function () {
         setCarryFlagFromBit0(regA);
         regA = regA >> 1;
         LSR(regA);
       },
 
-      i4c: function() {
+      i4c: function () {
         regPC = popWord();
         //JMP
       },
 
-      i4d: function() {
+      i4d: function () {
         var addr = popWord();
         var value = memory.get(addr);
         regA ^= value;
         EOR();
       },
 
-      i4e: function() {
+      i4e: function () {
         var addr = popWord();
         var value = memory.get(addr);
         setCarryFlagFromBit0(value);
@@ -961,7 +977,7 @@ function SimulatorWidget(node) {
         LSR(value);
       },
 
-      i50: function() {
+      i50: function () {
         var offset = popByte();
         if (!overflowSet()) {
           jumpBranch(offset);
@@ -969,20 +985,20 @@ function SimulatorWidget(node) {
         //BVC
       },
 
-      i51: function() {
+      i51: function () {
         var zp = popByte();
         var value = memory.getWord(zp) + regY;
         regA ^= memory.get(value);
         EOR();
       },
 
-      i55: function() {
+      i55: function () {
         var addr = (popByte() + regX) & 0xff;
         regA ^= memory.get(addr);
         EOR();
       },
 
-      i56: function() {
+      i56: function () {
         var addr = (popByte() + regX) & 0xff;
         var value = memory.get(addr);
         setCarryFlagFromBit0(value);
@@ -991,27 +1007,27 @@ function SimulatorWidget(node) {
         LSR(value);
       },
 
-      i58: function() {
+      i58: function () {
         regP &= ~0x04;
         throw new Error("Interrupts not implemented");
         //CLI
       },
 
-      i59: function() {
+      i59: function () {
         var addr = popWord() + regY;
         var value = memory.get(addr);
         regA ^= value;
         EOR();
       },
 
-      i5d: function() {
+      i5d: function () {
         var addr = popWord() + regX;
         var value = memory.get(addr);
         regA ^= value;
         EOR();
       },
 
-      i5e: function() {
+      i5e: function () {
         var addr = popWord() + regX;
         var value = memory.get(addr);
         setCarryFlagFromBit0(value);
@@ -1020,12 +1036,12 @@ function SimulatorWidget(node) {
         LSR(value);
       },
 
-      i60: function() {
+      i60: function () {
         regPC = (stackPop() | (stackPop() << 8)) + 1;
         //RTS
       },
 
-      i61: function() {
+      i61: function () {
         var zp = (popByte() + regX) & 0xff;
         var addr = memory.getWord(zp);
         var value = memory.get(addr);
@@ -1033,14 +1049,14 @@ function SimulatorWidget(node) {
         //ADC
       },
 
-      i65: function() {
+      i65: function () {
         var addr = popByte();
         var value = memory.get(addr);
         testADC(value);
         //ADC
       },
 
-      i66: function() {
+      i66: function () {
         var sf = carrySet();
         var addr = popByte();
         var value = memory.get(addr);
@@ -1053,19 +1069,19 @@ function SimulatorWidget(node) {
         ROR(value);
       },
 
-      i68: function() {
+      i68: function () {
         regA = stackPop();
         setNVflagsForRegA();
         //PLA
       },
 
-      i69: function() {
+      i69: function () {
         var value = popByte();
         testADC(value);
         //ADC
       },
 
-      i6a: function() {
+      i6a: function () {
         var sf = carrySet();
         setCarryFlagFromBit0(regA);
         regA = regA >> 1;
@@ -1075,19 +1091,19 @@ function SimulatorWidget(node) {
         ROR(regA);
       },
 
-      i6c: function() {
+      i6c: function () {
         regPC = memory.getWord(popWord());
         //JMP
       },
 
-      i6d: function() {
+      i6d: function () {
         var addr = popWord();
         var value = memory.get(addr);
         testADC(value);
         //ADC
       },
 
-      i6e: function() {
+      i6e: function () {
         var sf = carrySet();
         var addr = popWord();
         var value = memory.get(addr);
@@ -1100,7 +1116,7 @@ function SimulatorWidget(node) {
         ROR(value);
       },
 
-      i70: function() {
+      i70: function () {
         var offset = popByte();
         if (overflowSet()) {
           jumpBranch(offset);
@@ -1108,7 +1124,7 @@ function SimulatorWidget(node) {
         //BVS
       },
 
-      i71: function() {
+      i71: function () {
         var zp = popByte();
         var addr = memory.getWord(zp);
         var value = memory.get(addr + regY);
@@ -1116,14 +1132,14 @@ function SimulatorWidget(node) {
         //ADC
       },
 
-      i75: function() {
+      i75: function () {
         var addr = (popByte() + regX) & 0xff;
         var value = memory.get(addr);
         testADC(value);
         //ADC
       },
 
-      i76: function() {
+      i76: function () {
         var sf = carrySet();
         var addr = (popByte() + regX) & 0xff;
         var value = memory.get(addr);
@@ -1136,27 +1152,27 @@ function SimulatorWidget(node) {
         ROR(value);
       },
 
-      i78: function() {
+      i78: function () {
         regP |= 0x04;
         throw new Error("Interrupts not implemented");
         //SEI
       },
 
-      i79: function() {
+      i79: function () {
         var addr = popWord();
         var value = memory.get(addr + regY);
         testADC(value);
         //ADC
       },
 
-      i7d: function() {
+      i7d: function () {
         var addr = popWord();
         var value = memory.get(addr + regX);
         testADC(value);
         //ADC
       },
 
-      i7e: function() {
+      i7e: function () {
         var sf = carrySet();
         var addr = popWord() + regX;
         var value = memory.get(addr);
@@ -1169,56 +1185,56 @@ function SimulatorWidget(node) {
         ROR(value);
       },
 
-      i81: function() {
+      i81: function () {
         var zp = (popByte() + regX) & 0xff;
         var addr = memory.getWord(zp);
         memory.storeByte(addr, regA);
         //STA
       },
 
-      i84: function() {
+      i84: function () {
         memory.storeByte(popByte(), regY);
         //STY
       },
 
-      i85: function() {
+      i85: function () {
         memory.storeByte(popByte(), regA);
         //STA
       },
 
-      i86: function() {
+      i86: function () {
         memory.storeByte(popByte(), regX);
         //STX
       },
 
-      i88: function() {
+      i88: function () {
         regY = (regY - 1) & 0xff;
         setNVflagsForRegY();
         //DEY
       },
 
-      i8a: function() {
+      i8a: function () {
         regA = regX & 0xff;
         setNVflagsForRegA();
         //TXA
       },
 
-      i8c: function() {
+      i8c: function () {
         memory.storeByte(popWord(), regY);
         //STY
       },
 
-      i8d: function() {
+      i8d: function () {
         memory.storeByte(popWord(), regA);
         //STA
       },
 
-      i8e: function() {
+      i8e: function () {
         memory.storeByte(popWord(), regX);
         //STX
       },
 
-      i90: function() {
+      i90: function () {
         var offset = popByte();
         if (!carrySet()) {
           jumpBranch(offset);
@@ -1226,115 +1242,115 @@ function SimulatorWidget(node) {
         //BCC
       },
 
-      i91: function() {
+      i91: function () {
         var zp = popByte();
         var addr = memory.getWord(zp) + regY;
         memory.storeByte(addr, regA);
         //STA
       },
 
-      i94: function() {
+      i94: function () {
         memory.storeByte((popByte() + regX) & 0xff, regY);
         //STY
       },
 
-      i95: function() {
+      i95: function () {
         memory.storeByte((popByte() + regX) & 0xff, regA);
         //STA
       },
 
-      i96: function() {
+      i96: function () {
         memory.storeByte((popByte() + regY) & 0xff, regX);
         //STX
       },
 
-      i98: function() {
+      i98: function () {
         regA = regY & 0xff;
         setNVflagsForRegA();
         //TYA
       },
 
-      i99: function() {
+      i99: function () {
         memory.storeByte(popWord() + regY, regA);
         //STA
       },
 
-      i9a: function() {
+      i9a: function () {
         regSP = regX & 0xff;
         //TXS
       },
 
-      i9d: function() {
+      i9d: function () {
         var addr = popWord();
         memory.storeByte(addr + regX, regA);
         //STA
       },
 
-      ia0: function() {
+      ia0: function () {
         regY = popByte();
         LDY();
       },
 
-      ia1: function() {
+      ia1: function () {
         var zp = (popByte() + regX) & 0xff;
         var addr = memory.getWord(zp);
         regA = memory.get(addr);
         LDA();
       },
 
-      ia2: function() {
+      ia2: function () {
         regX = popByte();
         LDX();
       },
 
-      ia4: function() {
+      ia4: function () {
         regY = memory.get(popByte());
         LDY();
       },
 
-      ia5: function() {
+      ia5: function () {
         regA = memory.get(popByte());
         LDA();
       },
 
-      ia6: function() {
+      ia6: function () {
         regX = memory.get(popByte());
         LDX();
       },
 
-      ia8: function() {
+      ia8: function () {
         regY = regA & 0xff;
         setNVflagsForRegY();
         //TAY
       },
 
-      ia9: function() {
+      ia9: function () {
         regA = popByte();
         LDA();
       },
 
-      iaa: function() {
+      iaa: function () {
         regX = regA & 0xff;
         setNVflagsForRegX();
         //TAX
       },
 
-      iac: function() {
+      iac: function () {
         regY = memory.get(popWord());
         LDY();
       },
 
-      iad: function() {
+      iad: function () {
         regA = memory.get(popWord());
         LDA();
       },
 
-      iae: function() {
+      iae: function () {
         regX = memory.get(popWord());
         LDX();
       },
 
-      ib0: function() {
+      ib0: function () {
         var offset = popByte();
         if (carrySet()) {
           jumpBranch(offset);
@@ -1342,69 +1358,69 @@ function SimulatorWidget(node) {
         //BCS
       },
 
-      ib1: function() {
+      ib1: function () {
         var zp = popByte();
         var addr = memory.getWord(zp) + regY;
         regA = memory.get(addr);
         LDA();
       },
 
-      ib4: function() {
+      ib4: function () {
         regY = memory.get((popByte() + regX) & 0xff);
         LDY();
       },
 
-      ib5: function() {
+      ib5: function () {
         regA = memory.get((popByte() + regX) & 0xff);
         LDA();
       },
 
-      ib6: function() {
+      ib6: function () {
         regX = memory.get((popByte() + regY) & 0xff);
         LDX();
       },
 
-      ib8: function() {
+      ib8: function () {
         CLV();
       },
 
-      ib9: function() {
+      ib9: function () {
         var addr = popWord() + regY;
         regA = memory.get(addr);
         LDA();
       },
 
-      iba: function() {
+      iba: function () {
         regX = regSP & 0xff;
         LDX();
         //TSX
       },
 
-      ibc: function() {
+      ibc: function () {
         var addr = popWord() + regX;
         regY = memory.get(addr);
         LDY();
       },
 
-      ibd: function() {
+      ibd: function () {
         var addr = popWord() + regX;
         regA = memory.get(addr);
         LDA();
       },
 
-      ibe: function() {
+      ibe: function () {
         var addr = popWord() + regY;
         regX = memory.get(addr);
         LDX();
       },
 
-      ic0: function() {
+      ic0: function () {
         var value = popByte();
         doCompare(regY, value);
         //CPY
       },
 
-      ic1: function() {
+      ic1: function () {
         var zp = (popByte() + regX) & 0xff;
         var addr = memory.getWord(zp);
         var value = memory.get(addr);
@@ -1412,59 +1428,59 @@ function SimulatorWidget(node) {
         //CPA
       },
 
-      ic4: function() {
+      ic4: function () {
         var value = memory.get(popByte());
         doCompare(regY, value);
         //CPY
       },
 
-      ic5: function() {
+      ic5: function () {
         var value = memory.get(popByte());
         doCompare(regA, value);
         //CPA
       },
 
-      ic6: function() {
+      ic6: function () {
         var zp = popByte();
         DEC(zp);
       },
 
-      ic8: function() {
+      ic8: function () {
         regY = (regY + 1) & 0xff;
         setNVflagsForRegY();
         //INY
       },
 
-      ic9: function() {
+      ic9: function () {
         var value = popByte();
         doCompare(regA, value);
         //CMP
       },
 
-      ica: function() {
+      ica: function () {
         regX = (regX - 1) & 0xff;
         setNVflagsForRegX();
         //DEX
       },
 
-      icc: function() {
+      icc: function () {
         var value = memory.get(popWord());
         doCompare(regY, value);
         //CPY
       },
 
-      icd: function() {
+      icd: function () {
         var value = memory.get(popWord());
         doCompare(regA, value);
         //CPA
       },
 
-      ice: function() {
+      ice: function () {
         var addr = popWord();
         DEC(addr);
       },
 
-      id0: function() {
+      id0: function () {
         var offset = popByte();
         if (!zeroSet()) {
           jumpBranch(offset);
@@ -1472,7 +1488,7 @@ function SimulatorWidget(node) {
         //BNE
       },
 
-      id1: function() {
+      id1: function () {
         var zp = popByte();
         var addr = memory.getWord(zp) + regY;
         var value = memory.get(addr);
@@ -1480,48 +1496,48 @@ function SimulatorWidget(node) {
         //CMP
       },
 
-      id5: function() {
+      id5: function () {
         var value = memory.get((popByte() + regX) & 0xff);
         doCompare(regA, value);
         //CMP
       },
 
-      id6: function() {
+      id6: function () {
         var addr = (popByte() + regX) & 0xff;
         DEC(addr);
       },
 
-      id8: function() {
+      id8: function () {
         regP &= 0xf7;
         //CLD
       },
 
-      id9: function() {
+      id9: function () {
         var addr = popWord() + regY;
         var value = memory.get(addr);
         doCompare(regA, value);
         //CMP
       },
 
-      idd: function() {
+      idd: function () {
         var addr = popWord() + regX;
         var value = memory.get(addr);
         doCompare(regA, value);
         //CMP
       },
 
-      ide: function() {
+      ide: function () {
         var addr = popWord() + regX;
         DEC(addr);
       },
 
-      ie0: function() {
+      ie0: function () {
         var value = popByte();
         doCompare(regX, value);
         //CPX
       },
 
-      ie1: function() {
+      ie1: function () {
         var zp = (popByte() + regX) & 0xff;
         var addr = memory.getWord(zp);
         var value = memory.get(addr);
@@ -1529,66 +1545,65 @@ function SimulatorWidget(node) {
         //SBC
       },
 
-      ie4: function() {
+      ie4: function () {
         var value = memory.get(popByte());
         doCompare(regX, value);
         //CPX
       },
 
-      ie5: function() {
+      ie5: function () {
         var addr = popByte();
         var value = memory.get(addr);
         testSBC(value);
         //SBC
       },
 
-      ie6: function() {
+      ie6: function () {
         var zp = popByte();
         INC(zp);
       },
 
-      ie8: function() {
+      ie8: function () {
         regX = (regX + 1) & 0xff;
         setNVflagsForRegX();
         //INX
       },
 
-      ie9: function() {
+      ie9: function () {
         var value = popByte();
         testSBC(value);
         //SBC
       },
 
-      iea: function() {
+      iea: function () {
         //NOP
       },
 
-      i42: function() {
+      i42: function () {
         //WDM  -- pseudo op for emulator: arg 0 to output A to message box
         var value = popByte();
-        if (value == 0)
-          message(String.fromCharCode(regA));
+        if (value == 0) message(String.fromCharCode(regA));
       },
 
-      iec: function() {
+      iec: function () {
         var value = memory.get(popWord());
         doCompare(regX, value);
         //CPX
       },
 
-      ied: function() {
+      ied: function () {
         var addr = popWord();
         var value = memory.get(addr);
         testSBC(value);
         //SBC
       },
 
-      iee: function() {
+      iee: function () {
         var addr = popWord();
         INC(addr);
       },
 
-      if0: function() {
+      if0: function () {
         var offset = popByte();
         if (zeroSet()) {
           jumpBranch(offset);
@@ -1596,7 +1611,7 @@ function SimulatorWidget(node) {
         //BEQ
       },
 
-      if1: function() {
+      if1: function () {
         var zp = popByte();
         var addr = memory.getWord(zp);
         var value = memory.get(addr + regY);
@@ -1604,46 +1619,46 @@ function SimulatorWidget(node) {
         //SBC
       },
 
-      if5: function() {
+      if5: function () {
         var addr = (popByte() + regX) & 0xff;
         var value = memory.get(addr);
         testSBC(value);
         //SBC
       },
 
-      if6: function() {
+      if6: function () {
         var addr = (popByte() + regX) & 0xff;
         INC(addr);
       },
 
-      if8: function() {
+      if8: function () {
         regP |= 8;
         //SED
       },
 
-      if9: function() {
+      if9: function () {
         var addr = popWord();
         var value = memory.get(addr + regY);
         testSBC(value);
         //SBC
       },
 
-      ifd: function() {
+      ifd: function () {
         var addr = popWord();
         var value = memory.get(addr + regX);
         testSBC(value);
         //SBC
       },
 
-      ife: function() {
+      ife: function () {
         var addr = popWord() + regX;
         INC(addr);
       },
 
-      ierr: function() {
+      ierr: function () {
         message("Address $" + addr2hex(regPC) + " - unknown opcode");
         codeRunning = false;
-      }
+      },
     };
 
     function stackPush(value) {
@@ -1668,7 +1683,7 @@ function SimulatorWidget(node) {
 
     // Pops a byte
     function popByte() {
-      return (memory.get(regPC++) & 0xff);
+      return memory.get(regPC++) & 0xff;
     }
 
     // Pops a little-endian word
@@ -1687,25 +1702,23 @@ function SimulatorWidget(node) {
       if (!debug) {
         // use a prime number of iterations to avoid aliasing effects
         var s = speed;
-        console.log(speed);
         for (var w = 0; w < s; w++) {
           execute();
         }
       }
       updateDebugInfo();
 
-      if(codeRunning) {
+      if (codeRunning) {
         window.requestAnimationFrame(multiExecute);
       }
     }
 
-
     function executeNextInstruction() {
       var instructionName = popByte().toString(16).toLowerCase();
       if (instructionName.length === 1) {
-        instructionName = '0' + instructionName;
+        instructionName = "0" + instructionName;
       }
-      var instruction = instructions['i' + instructionName];
+      var instruction = instructions["i" + instructionName];
 
       if (instruction) {
         instruction();
@@ -1722,7 +1735,7 @@ function SimulatorWidget(node) {
 
       executeNextInstruction();
 
-      if ((regPC === 0) || (!codeRunning && !debugging)) {
+      if (regPC === 0 || (!codeRunning && !debugging)) {
         stop();
         message("Program end at PC=$" + addr2hex(regPC - 1));
         ui.stop();
@@ -1731,39 +1744,46 @@ function SimulatorWidget(node) {
 
     function updateMonitor() {
       if (monitoring) {
-        var start = parseInt($node.find('.start').val(), 16);
-        var length = parseInt($node.find('.length').val(), 16);
+        var start = parseInt($node.find(".start").val(), 16);
+        var length = parseInt($node.find(".length").val(), 16);
 
         var end = start + length - 1;
 
-        var monitorNode = $node.find('.monitor code');
+        var monitorNode = $node.find(".monitor code");
 
-        if (!isNaN(start) && !isNaN(length) && start >= 0 && length > 0 && end <= 0xffff) {
-          monitorNode.html("       0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n" + memory.format(start, length));
+        if (
+          !isNaN(start) &&
+          !isNaN(length) &&
+          start >= 0 &&
+          length > 0 &&
+          end <= 0xffff
+        ) {
+          monitorNode.html(
+            "       0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n" +
+              memory.format(start, length)
+          );
         } else {
-          monitorNode.html('Cannot monitor this range. Valid ranges are between $0000 and $ffff, inclusive.');
+          monitorNode.html(
+            "Cannot monitor this range. Valid ranges are between $0000 and $ffff, inclusive."
+          );
         }
       }
     }
 
     function handleMonitorRangeChange() {
-
-      var $start = $node.find('.start'),
-        $length = $node.find('.length'),
+      var $start = $node.find(".start"),
+        $length = $node.find(".length"),
         start = parseInt($start.val(), 16),
         length = parseInt($length.val(), 16),
         end = start + length - 1;
 
-      $start.removeClass('monitor-invalid');
-      $length.removeClass('monitor-invalid');
+      $start.removeClass("monitor-invalid");
+      $length.removeClass("monitor-invalid");
 
       if (isNaN(start) || start < 0 || start > 0xffff) {
-
-        $start.addClass('monitor-invalid');
-
+        $start.addClass("monitor-invalid");
       } else if (isNaN(length) || end > 0xffff) {
-
-        $length.addClass('monitor-invalid');
+        $length.addClass("monitor-invalid");
       }
     }
 
@@ -1776,15 +1796,21 @@ function SimulatorWidget(node) {
     }
 
     function updateDebugInfo() {
-
-      var html = "A=$" + num2hex(regA) + " X=$" + num2hex(regX) + " Y=$" + num2hex(regY) + "<br />";
+      var html =
+        "A=$" +
+        num2hex(regA) +
+        " X=$" +
+        num2hex(regX) +
+        " Y=$" +
+        num2hex(regY) +
+        "<br />";
       html += "SP=$" + num2hex(regSP) + " PC=$" + addr2hex(regPC);
       html += "<br />";
       html += "NV-BDIZC<br />";
       for (var i = 7; i >= 0; i--) {
-        html += regP >> i & 1;
+        html += (regP >> i) & 1;
       }
-      $node.find('.minidebugger').html(html);
+      $node.find(".minidebugger").html(html);
 
       updateMonitor();
     }
@@ -1812,7 +1838,6 @@ function SimulatorWidget(node) {
       updateDebugInfo();
     }
 
-
     function stopDebugger() {
       debug = false;
     }
@@ -1828,10 +1853,12 @@ function SimulatorWidget(node) {
     function reset() {
       display.reset();
       screen.reset();
-      for (var i = 0; i < 0x600; i++) { // clear ZP, stack and screen
+      for (var i = 0; i < 0x600; i++) {
+        // clear ZP, stack and screen
         memory.set(i, 0x00);
       }
-      for (var i = 0xf000; i < 0xf000 + 80*25; i++) { // clear text screen
+      for (var i = 0xf000; i < 0xf000 + 80 * 25; i++) {
+        // clear text screen
         memory.set(i, 0x00);
       }
       regA = regX = regY = 0;
@@ -1864,10 +1891,9 @@ function SimulatorWidget(node) {
       stop: stop,
       toggleMonitor: toggleMonitor,
       toggleConsole: toggleConsole,
-      handleMonitorRangeChange: handleMonitorRangeChange
+      handleMonitorRangeChange: handleMonitorRangeChange,
     };
   }
-
 
   function Labels() {
     var labelIndex = [];
@@ -1875,7 +1901,9 @@ function SimulatorWidget(node) {
     function indexLines(lines, symbols) {
       for (var i = 0; i < lines.length; i++) {
         if (!indexLine(lines[i], symbols)) {
-          message("**Label already defined at line " + (i + 1) + ":** " + lines[i]);
+          message(
+            "**Label already defined at line " + (i + 1) + ":** " + lines[i]
+          );
           return false;
         }
       }
@@ -1885,7 +1913,6 @@ function SimulatorWidget(node) {
     // Extract label if line contains one and calculate position in memory.
     // Return false if label already exists.
     function indexLine(input, symbols) {
-
       // Figure out how many bytes this instruction takes
       var currentPC = assembler.getCurrentPC();
       assembler.assembleLine(input, 0, symbols); //TODO: find a better way for Labels to have access to assembler
@@ -1895,7 +1922,11 @@ function SimulatorWidget(node) {
         var label = input.replace(/(^\w+):.*$/, "$1");
 
         if (symbols.lookup(label)) {
-          message("**Label " + label + "is already used as a symbol; please rename one of them**");
+          message(
+            "**Label " +
+              label +
+              "is already used as a symbol; please rename one of them**"
+          );
           return false;
         }
 
@@ -1944,7 +1975,7 @@ function SimulatorWidget(node) {
       for (var i = 0; i < labelIndex.length; i++) {
         nameAndAddr = labelIndex[i].split("|");
         if (name === nameAndAddr[0]) {
-          return (nameAndAddr[1]);
+          return nameAndAddr[1];
         }
       }
       return -1;
@@ -1967,10 +1998,9 @@ function SimulatorWidget(node) {
       find: find,
       getPC: getPC,
       displayMessage: displayMessage,
-      reset: reset
+      reset: reset,
     };
   }
-
 
   function Assembler() {
     var defaultCodePC;
@@ -1980,68 +2010,11 @@ function SimulatorWidget(node) {
 
     var Opcodes = [
       /* Name, Imm,  ZP,   ZPX,  ZPY,  ABS, ABSX, ABSY,  IND, INDX, INDY, SNGL, BRA */
-      ["ADC", 0x69, 0x65, 0x75, null, 0x6d, 0x7d, 0x79, null, 0x61, 0x71, null, null],
-      ["AND", 0x29, 0x25, 0x35, null, 0x2d, 0x3d, 0x39, null, 0x21, 0x31, null, null],
-      ["ASL", null, 0x06, 0x16, null, 0x0e, 0x1e, null, null, null, null, 0x0a, null],
-      ["BIT", null, 0x24, null, null, 0x2c, null, null, null, null, null, null, null],
-      ["BPL", null, null, null, null, null, null, null, null, null, null, null, 0x10],
-      ["BMI", null, null, null, null, null, null, null, null, null, null, null, 0x30],
-      ["BVC", null, null, null, null, null, null, null, null, null, null, null, 0x50],
-      ["BVS", null, null, null, null, null, null, null, null, null, null, null, 0x70],
-      ["BCC", null, null, null, null, null, null, null, null, null, null, null, 0x90],
-      ["BCS", null, null, null, null, null, null, null, null, null, null, null, 0xb0],
-      ["BNE", null, null, null, null, null, null, null, null, null, null, null, 0xd0],
-      ["BEQ", null, null, null, null, null, null, null, null, null, null, null, 0xf0],
-      ["BRK", null, null, null, null, null, null, null, null, null, null, 0x00, null],
-      ["CMP", 0xc9, 0xc5, 0xd5, null, 0xcd, 0xdd, 0xd9, null, 0xc1, 0xd1, null, null],
-      ["CPX", 0xe0, 0xe4, null, null, 0xec, null, null, null, null, null, null, null],
-      ["CPY", 0xc0, 0xc4, null, null, 0xcc, null, null, null, null, null, null, null],
-      ["DEC", null, 0xc6, 0xd6, null, 0xce, 0xde, null, null, null, null, null, null],
-      ["EOR", 0x49, 0x45, 0x55, null, 0x4d, 0x5d, 0x59, null, 0x41, 0x51, null, null],
-      ["CLC", null, null, null, null, null, null, null, null, null, null, 0x18, null],
-      ["SEC", null, null, null, null, null, null, null, null, null, null, 0x38, null],
-      ["CLI", null, null, null, null, null, null, null, null, null, null, 0x58, null],
-      ["SEI", null, null, null, null, null, null, null, null, null, null, 0x78, null],
-      ["CLV", null, null, null, null, null, null, null, null, null, null, 0xb8, null],
-      ["CLD", null, null, null, null, null, null, null, null, null, null, 0xd8, null],
-      ["SED", null, null, null, null, null, null, null, null, null, null, 0xf8, null],
-      ["INC", null, 0xe6, 0xf6, null, 0xee, 0xfe, null, null, null, null, null, null],
-      ["JMP", null, null, null, null, 0x4c, null, null, 0x6c, null, null, null, null],
-      ["JSR", null, null, null, null, 0x20, null, null, null, null, null, null, null],
-      ["LDA", 0xa9, 0xa5, 0xb5, null, 0xad, 0xbd, 0xb9, null, 0xa1, 0xb1, null, null],
-      ["LDX", 0xa2, 0xa6, null, 0xb6, 0xae, null, 0xbe, null, null, null, null, null],
-      ["LDY", 0xa0, 0xa4, 0xb4, null, 0xac, 0xbc, null, null, null, null, null, null],
-      ["LSR", null, 0x46, 0x56, null, 0x4e, 0x5e, null, null, null, null, 0x4a, null],
-      ["NOP", null, null, null, null, null, null, null, null, null, null, 0xea, null],
-      ["ORA", 0x09, 0x05, 0x15, null, 0x0d, 0x1d, 0x19, null, 0x01, 0x11, null, null],
-      ["TAX", null, null, null, null, null, null, null, null, null, null, 0xaa, null],
-      ["TXA", null, null, null, null, null, null, null, null, null, null, 0x8a, null],
-      ["DEX", null, null, null, null, null, null, null, null, null, null, 0xca, null],
-      ["INX", null, null, null, null, null, null, null, null, null, null, 0xe8, null],
-      ["TAY", null, null, null, null, null, null, null, null, null, null, 0xa8, null],
-      ["TYA", null, null, null, null, null, null, null, null, null, null, 0x98, null],
-      ["DEY", null, null, null, null, null, null, null, null, null, null, 0x88, null],
-      ["INY", null, null, null, null, null, null, null, null, null, null, 0xc8, null],
-      ["ROR", null, 0x66, 0x76, null, 0x6e, 0x7e, null, null, null, null, 0x6a, null],
-      ["ROL", null, 0x26, 0x36, null, 0x2e, 0x3e, null, null, null, null, 0x2a, null],
-      ["RTI", null, null, null, null, null, null, null, null, null, null, 0x40, null],
-      ["RTS", null, null, null, null, null, null, null, null, null, null, 0x60, null],
-      ["SBC", 0xe9, 0xe5, 0xf5, null, 0xed, 0xfd, 0xf9, null, 0xe1, 0xf1, null, null],
-      ["STA", null, 0x85, 0x95, null, 0x8d, 0x9d, 0x99, null, 0x81, 0x91, null, null],
-      ["TXS", null, null, null, null, null, null, null, null, null, null, 0x9a, null],
-      ["TSX", null, null, null, null, null, null, null, null, null, null, 0xba, null],
-      ["PHA", null, null, null, null, null, null, null, null, null, null, 0x48, null],
-      ["PLA", null, null, null, null, null, null, null, null, null, null, 0x68, null],
-      ["PHP", null, null, null, null, null, null, null, null, null, null, 0x08, null],
-      ["PLP", null, null, null, null, null, null, null, null, null, null, 0x28, null],
-      ["STX", null, 0x86, null, 0x96, 0x8e, null, null, null, null, null, null, null],
-      ["STY", null, 0x84, 0x94, null, 0x8c, null, null, null, null, null, null, null],
-      ["WDM", 0x42, 0x42, null, null, null, null, null, null, null, null, null, null],
-      ["---", null, null, null, null, null, null, null, null, null, null, null, null]
+      [ "ADC", 0x69, 0x65, 0x75, null, 0x6d, 0x7d, 0x79, null, 0x61, 0x71, null, null, ], [ "AND", 0x29, 0x25, 0x35, null, 0x2d, 0x3d, 0x39, null, 0x21, 0x31, null, null, ], [ "ASL", null, 0x06, 0x16, null, 0x0e, 0x1e, null, null, null, null, 0x0a, null, ], [ "BIT", null, 0x24, null, null, 0x2c, null, null, null, null, null, null, null, ], [ "BPL", null, null, null, null, null, null, null, null, null, null, null, 0x10, ], [ "BMI", null, null, null, null, null, null, null, null, null, null, null, 0x30, ], [ "BVC", null, null, null, null, null, null, null, null, null, null, null, 0x50, ], [ "BVS", null, null, null, null, null, null, null, null, null, null, null, 0x70, ], [ "BCC", null, null, null, null, null, null, null, null, null, null, null, 0x90, ], [ "BCS", null, null, null, null, null, null, null, null, null, null, null, 0xb0, ], [ "BNE", null, null, null, null, null, null, null, null, null, null, null, 0xd0, ], [ "BEQ", null, null, null, null, null, null, null, null, null, null, null, 0xf0, ], [ "BRK", null, null, null, null, null, null, null, null, null, null, 0x00, null, ], [ "CMP", 0xc9, 0xc5, 0xd5, null, 0xcd, 0xdd, 0xd9, null, 0xc1, 0xd1, null, null, ], [ "CPX", 0xe0, 0xe4, null, null, 0xec, null, null, null, null, null, null, null, ], [ "CPY", 0xc0, 0xc4, null, null, 0xcc, null, null, null, null, null, null, null, ], [ "DEC", null, 0xc6, 0xd6, null, 0xce, 0xde, null, null, null, null, null, null, ], [ "EOR", 0x49, 0x45, 0x55, null, 0x4d, 0x5d, 0x59, null, 0x41, 0x51, null, null, ], [ "CLC", null, null, null, null, null, null, null, null, null, null, 0x18, null, ], [ "SEC", null, null, null, null, null, null, null, null, null, null, 0x38, null, ], [ "CLI", null, null, null, null, null, null, null, null, null, null, 0x58, null, ], [ "SEI", null, null, null, null, null, null, null, null, null, null, 0x78, null, ], [ "CLV", null, null, null, null, null, null, null, null, null, null, 0xb8, null, ], [ "CLD", null, null, null, null, null, null, null, null, null, null, 0xd8, null, ], [ "SED", null, null, null, null, null, null, null, null, null, null, 0xf8, null, ], [ "INC", null, 0xe6, 0xf6, null, 0xee, 0xfe, null, null, null, null, null, null, ], [ "JMP", null, null, null, null, 0x4c, null, null, 0x6c, null, null, null, null, ], [ "JSR", null, null, null, null, 0x20, null, null, null, null, null, null, null, ], [ "LDA", 0xa9, 0xa5, 0xb5, null, 0xad, 0xbd, 0xb9, null, 0xa1, 0xb1, null, null, ], [ "LDX", 0xa2, 0xa6, null, 0xb6, 0xae, null, 0xbe, null, null, null, null, null, ], [ "LDY", 0xa0, 0xa4, 0xb4, null, 0xac, 0xbc, null, null, null, null, null, null, ], [ "LSR", null, 0x46, 0x56, null, 0x4e, 0x5e, null, null, null, null, 0x4a, null, ], [ "NOP", null, null, null, null, null, null, null, null, null, null, 0xea, null, ], [ "ORA", 0x09, 0x05, 0x15, null, 0x0d, 0x1d, 0x19, null, 0x01, 0x11, null, null, ], [ "TAX", null, null, null, null, null, null, null, null, null, null, 0xaa, null, ], [ "TXA", null, null, null, null, null, null, null, null, null, null, 0x8a, null, ], [ "DEX", null, null, null, null, null, null, null, null, null, null, 0xca, null, ], [ "INX", null, null, null, null, null, null, null, null, null, null, 0xe8, null, ], [ "TAY", null, null, null, null, null, null, null, null, null, null, 0xa8, null, ], [ "TYA", null, null, null, null, null, null, null, null, null, null, 0x98, null, ], [ "DEY", null, null, null, null, null, null, null, null, null, null, 0x88, null, ], [ "INY", null, null, null, null, null, null, null, null, null, null, 0xc8, null, ], [ "ROR", null, 0x66, 0x76, null, 0x6e, 0x7e, null, null, null, null, 0x6a, null, ], [ "ROL", null, 0x26, 0x36, null, 0x2e, 0x3e, null, null, null, null, 0x2a, null, ], [ "RTI", null, null, null, null, null, null, null, null, null, null, 0x40, null, ], [ "RTS", null, null, null, null, null, null, null, null, null, null, 0x60, null, ], [ "SBC", 0xe9, 0xe5, 0xf5, null, 0xed, 0xfd, 0xf9, null, 0xe1, 0xf1, null, null, ], [ "STA", null, 0x85, 0x95, null, 0x8d, 0x9d, 0x99, null, 0x81, 0x91, null, null, ], [ "TXS", null, null, null, null, null, null, null, null, null, null, 0x9a, null, ], [ "TSX", null, null, null, null, null, null, null, null, null, null, 0xba, null, ], [ "PHA", null, null, null, null, null, null, null, null, null, null, 0x48, null, ], [ "PLA", null, null, null, null, null, null, null, null, null, null, 0x68, null, ], [ "PHP", null, null, null, null, null, null, null, null, null, null, 0x08, null, ], [ "PLP", null, null, null, null, null, null, null, null, null, null, 0x28, null, ], [ "STX", null, 0x86, null, 0x96, 0x8e, null, null, null, null, null, null, null, ], [ "STY", null, 0x84, 0x94, null, 0x8c, null, null, null, null, null, null, null, ], [ "WDM", 0x42, 0x42, null, null, null, null, null, null, null, null, null, null, ], [ "---", null, null, null, null, null, null, null, null, null, null, null, null, ], 
     ];
 
     // Assembles the code into memory
-    function assembleCode() {
+    function assembleCode(code) {
       var BOOTSTRAP_ADDRESS = 0x600;
 
       wasOutOfRangeBranch = false;
@@ -2049,9 +2022,8 @@ function SimulatorWidget(node) {
       simulator.reset();
       labels.reset();
       defaultCodePC = BOOTSTRAP_ADDRESS;
-      $node.find('.messages code').empty();
+      $node.find(".messages code").empty();
 
-      var code = $node.find('.code').val();
       code += "\n\n";
       var lines = code.split("\n");
       codeAssembledOK = true;
@@ -2086,13 +2058,18 @@ function SimulatorWidget(node) {
         ui.assembleSuccess();
         memory.set(defaultCodePC, 0x00); //set a null byte at the end of the code
       } else {
-
         var str = lines[i].replace("<", "&lt;").replace(">", "&gt;");
 
         if (!wasOutOfRangeBranch) {
           message("**Syntax error line " + (i + 1) + ": " + str + "**");
         } else {
-          message('**Out of range branch on line ' + (i + 1) + ' (branches are limited to -128 to +127): ' + str + '**');
+          message(
+            "**Out of range branch on line " +
+              (i + 1) +
+              " (branches are limited to -128 to +127): " +
+              str +
+              "**"
+          );
         }
 
         ui.initialize();
@@ -2122,7 +2099,7 @@ function SimulatorWidget(node) {
       }
 
       function add(key, value) {
-        var valueAlreadyExists = table.hasOwnProperty(PREFIX + key)
+        var valueAlreadyExists = table.hasOwnProperty(PREFIX + key);
         if (!valueAlreadyExists) {
           table[PREFIX + key] = value;
         }
@@ -2140,8 +2117,8 @@ function SimulatorWidget(node) {
 
       // Callers will only need the lookup function
       return {
-        lookup: lookup
-      }
+        lookup: lookup,
+      };
     }
 
     // Assembles one line of code.
@@ -2178,7 +2155,7 @@ function SimulatorWidget(node) {
         } else {
           addr = parseInt(param, 10);
         }
-        if ((addr < 0) || (addr > 0xffff)) {
+        if (addr < 0 || addr > 0xffff) {
           message("Unable to relocate code outside 64k memory");
           return false;
         }
@@ -2259,10 +2236,10 @@ function SimulatorWidget(node) {
           } else if (ch >= "0" && ch <= "9") {
             number = parseInt(str, 10);
             pushByte(number);
-          } else if (ch = "\"" && str.substr(2,1) == "\"") {
+          } else if ((ch = '"' && str.substr(2, 1) == '"')) {
             number = str.charCodeAt(1) & 0xff;
             pushByte(number);
-	  } else {
+          } else {
             return false;
           }
         }
@@ -2632,7 +2609,7 @@ function SimulatorWidget(node) {
       if (param.match(/^\w+$/)) {
         pushByte(opcode);
         if (labels.find(param)) {
-          addr = (labels.getPC(param));
+          addr = labels.getPC(param);
           if (addr < 0 || addr > 0xffff) {
             return false;
           }
@@ -2660,7 +2637,11 @@ function SimulatorWidget(node) {
     }
 
     function openPopup(content, title) {
-      var w = window.open('about:blank', title, 'width=500,height=300,resizable=yes,scrollbars=yes,toolbar=no,location=no,menubar=no,status=no');
+      var w = window.open(
+        "about:blank",
+        title,
+        "width=500,height=300,resizable=yes,scrollbars=yes,toolbar=no,location=no,menubar=no,status=no"
+      );
 
       var html = "<html><head>";
       html += "<link href='style.css' rel='stylesheet' type='text/css' />";
@@ -2676,24 +2657,24 @@ function SimulatorWidget(node) {
 
     // Dump binary as hex to new window
     function hexdump() {
-      openPopup(memory.format(0x600, codeLen), 'Hexdump');
+      openPopup(memory.format(0x600, codeLen), "Hexdump");
     }
 
     // TODO: Create separate disassembler object?
     var addressingModes = [
       null,
-      'Imm',
-      'ZP',
-      'ZPX',
-      'ZPY',
-      'ABS',
-      'ABSX',
-      'ABSY',
-      'IND',
-      'INDX',
-      'INDY',
-      'SNGL',
-      'BRA'
+      "Imm",
+      "ZP",
+      "ZPX",
+      "ZPY",
+      "ABS",
+      "ABSX",
+      "ABSY",
+      "IND",
+      "INDX",
+      "INDY",
+      "SNGL",
+      "BRA",
     ];
 
     var instructionLength = {
@@ -2708,12 +2689,12 @@ function SimulatorWidget(node) {
       INDX: 2,
       INDY: 2,
       SNGL: 1,
-      BRA: 2
+      BRA: 2,
     };
 
     function getModeAndCode(byte) {
       var index;
-      var line = Opcodes.filter(function(line) {
+      var line = Opcodes.filter(function (line) {
         var possibleIndex = line.indexOf(byte);
         if (possibleIndex > -1) {
           index = possibleIndex;
@@ -2721,15 +2702,16 @@ function SimulatorWidget(node) {
         }
       })[0];
 
-      if (!line) { //instruction not found
+      if (!line) {
+        //instruction not found
         return {
-          opCode: '???',
-          mode: 'SNGL'
+          opCode: "???",
+          mode: "SNGL",
         };
       } else {
         return {
           opCode: line[0],
-          mode: addressingModes[index]
+          mode: addressingModes[index],
         };
       }
     }
@@ -2748,12 +2730,12 @@ function SimulatorWidget(node) {
       }
 
       function isBranchInstruction() {
-        return opCode.match(/^B/) && !(opCode == 'BIT' || opCode == 'BRK');
+        return opCode.match(/^B/) && !(opCode == "BIT" || opCode == "BRK");
       }
 
       //This is gnarly, but unavoidably so?
       function formatArguments() {
-        var argsString = args.map(num2hex).reverse().join('');
+        var argsString = args.map(num2hex).reverse().join("");
 
         if (isBranchInstruction()) {
           var destination = address + 2;
@@ -2766,67 +2748,65 @@ function SimulatorWidget(node) {
         }
 
         if (argsString) {
-          argsString = '$' + argsString;
+          argsString = "$" + argsString;
         }
-        if (mode == 'Imm') {
-          argsString = '#' + argsString;
+        if (mode == "Imm") {
+          argsString = "#" + argsString;
         }
         if (mode.match(/X$/)) {
-          argsString += ',X';
+          argsString += ",X";
         }
         if (mode.match(/^IND/)) {
-          argsString = '(' + argsString + ')';
+          argsString = "(" + argsString + ")";
         }
         if (mode.match(/Y$/)) {
-          argsString += ',Y';
+          argsString += ",Y";
         }
 
         if (isAccumulatorInstruction()) {
-          argsString = 'A';
+          argsString = "A";
         }
 
         return argsString;
       }
 
       return {
-        addByte: function(byte) {
+        addByte: function (byte) {
           bytes.push(byte);
         },
-        setModeAndCode: function(modeAndCode) {
+        setModeAndCode: function (modeAndCode) {
           opCode = modeAndCode.opCode;
           mode = modeAndCode.mode;
         },
-        addArg: function(arg) {
+        addArg: function (arg) {
           args.push(arg);
         },
-        toString: function() {
-          var bytesString = bytes.map(num2hex).join(' ');
-          var padding = Array(11 - bytesString.length).join(' ');
-          return '$' + addr2hex(address) + '    ' + bytesString + padding + opCode +
-            ' ' + formatArguments(args);
-        }
+        toString: function () {
+          var bytesString = bytes.map(num2hex).join(" ");
+          var padding = Array(11 - bytesString.length).join(" ");
+          return (
+            "$" +
+            addr2hex(address) +
+            "    " +
+            bytesString +
+            padding +
+            opCode +
+            " " +
+            formatArguments(args)
+          );
+        },
       };
     }
 
-    function upload() {
-	var file = document.getElementById("uploadFilename").files[0];
-	var fileReader = new FileReader();
-	fileReader.onload = function(fileLoadedEvent) 
-	{
-		var textFromFileLoaded = fileLoadedEvent.target.result;
-		document.getElementById("code").value = textFromFileLoaded;
-		simulator.stop();
-		ui.initialize(); 
-	};
-      	fileReader.readAsText(file, "UTF-8");
-    }
-
     function sendDownload(filename, text) {
-      var element = document.createElement('a');
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-      element.setAttribute('download', filename);
+      var element = document.createElement("a");
+      element.setAttribute(
+        "href",
+        "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+      );
+      element.setAttribute("download", filename);
 
-      element.style.display = 'none';
+      element.style.display = "none";
       document.body.appendChild(element);
 
       element.click();
@@ -2837,7 +2817,7 @@ function SimulatorWidget(node) {
     function download() {
       var text = document.getElementById("code").value;
       var filename = "6502-assembler-source.txt";
-    
+
       sendDownload(filename, text);
     }
 
@@ -2870,25 +2850,23 @@ function SimulatorWidget(node) {
         currentAddress++;
       }
 
-      var html = 'Address  Hexdump   Dissassembly\n';
-      html += '-------------------------------\n';
-      html += instructions.join('\n');
-      openPopup(html, 'Disassembly');
+      var html = "Address  Hexdump   Dissassembly\n";
+      html += "-------------------------------\n";
+      html += instructions.join("\n");
+      openPopup(html, "Disassembly");
     }
 
     return {
       assembleLine: assembleLine,
       assembleCode: assembleCode,
-      getCurrentPC: function() {
+      getCurrentPC: function () {
         return defaultCodePC;
       },
       hexdump: hexdump,
       disassemble: disassemble,
       download: download,
-      upload: upload,
     };
   }
-
 
   function addr2hex(addr) {
     return num2hex((addr >> 8) & 0xff) + num2hex(addr & 0xff);
@@ -2896,23 +2874,22 @@ function SimulatorWidget(node) {
 
   function num2hex(nr) {
     var str = "0123456789abcdef";
-    var hi = ((nr & 0xf0) >> 4);
-    var lo = (nr & 15);
+    var hi = (nr & 0xf0) >> 4;
+    var lo = nr & 15;
     return str.substring(hi, hi + 1) + str.substring(lo, lo + 1);
   }
 
   // Prints text in the message window
   function message(text) {
-    if (text.length > 1)
-      text += '\n'; // allow putc operations from the simulator (WDM opcode)
-    $node.find('.messages code').append(text).scrollTop(10000);
+    if (text.length > 1) text += "\n"; // allow putc operations from the simulator (WDM opcode)
+    $node.find(".messages code").append(text).scrollTop(10000);
   }
 
   initialize();
 }
 
-$(document).ready(function() {
-  $('.widget').each(function() {
+$(document).ready(function () {
+  $(".widget").each(function () {
     SimulatorWidget(this);
   });
 });
