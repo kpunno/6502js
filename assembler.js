@@ -22,7 +22,8 @@ function SimulatorWidget(node) {
   var labels = Labels();
   var simulator = Simulator();
   var assembler = Assembler();
-  var speed = document.getElementById("speed");
+  // Make difficult levels!
+  var speed = 53;
 
   function initialize() {
     stripText();
@@ -41,6 +42,10 @@ function SimulatorWidget(node) {
     $node.find('.disassembleButton').click(assembler.disassemble);
     $node.find('.downloadButton').click(assembler.download);
     $node.find('.uploadButton').click(assembler.upload);
+    $node.find('.autorunButton').click(function() {
+      assembler.assembleCode();
+      simulator.runBinary();
+    });
     $node.find('.debug').change(function() {
       var debug = $(this).is(':checked');
       if (debug) {
@@ -1673,21 +1678,16 @@ function SimulatorWidget(node) {
 
     // Executes the assembled code
     function runBinary() {
-      if (codeRunning) {
-        // Switch OFF everything
-        stop();
-        ui.stop();
-      } else {
-        ui.play();
-        codeRunning = true;
-        window.requestAnimationFrame(multiExecute);
-      }
+      ui.play();
+      codeRunning = true;
+      window.requestAnimationFrame(multiExecute);
     }
 
     function multiExecute() {
       if (!debug) {
         // use a prime number of iterations to avoid aliasing effects
-	var s = speed.value;
+        var s = speed;
+        console.log(speed);
         for (var w = 0; w < s; w++) {
           execute();
         }
@@ -2885,7 +2885,7 @@ function SimulatorWidget(node) {
       hexdump: hexdump,
       disassemble: disassemble,
       download: download,
-      upload: upload
+      upload: upload,
     };
   }
 
@@ -2916,4 +2916,3 @@ $(document).ready(function() {
     SimulatorWidget(this);
   });
 });
-
